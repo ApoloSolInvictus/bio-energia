@@ -145,29 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (link.getAttribute('href').includes(current)) {
                 link.classList.add('active');
                 
-         // --- LÓGICA PARA EL REPRODUCTOR DE AUDIO ---
-    const audioPlayer = document.getElementById('audio-player');
-    const audioButton = document.getElementById('audio-toggle-button');
-    const audioIcon = document.getElementById('audio-icon');
-
-    if(audioPlayer && audioButton && audioIcon) {
-        const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
-        const pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
-        
-        audioIcon.innerHTML = playIcon;
-
-        audioButton.addEventListener('click', function() {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                audioIcon.innerHTML = pauseIcon;
-            } else {
-                audioPlayer.pause();
-                audioIcon.innerHTML = playIcon;
-            }
-        });
-
-        audioPlayer.addEventListener('ended', function() {
-            audioIcon.innerHTML = playIcon;
         });
     }
 });
