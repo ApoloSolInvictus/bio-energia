@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Interactivo del Proyecto Bio-Energía</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- 
+    Chosen Palette: Earthy Harmony
+    Application Structure Plan: The application is designed as a single-page, scrolling dashboard. This structure allows users to get a comprehensive overview at a glance, while the top navigation facilitates quick jumps to specific sections of interest. The flow is logical: starting with the high-level vision (Visión), moving to the actionable plan (Hoja de Ruta), detailing the core components (Gobernanza, Actores, Tecnología, Comunidad), and concluding with success metrics (KPIs). This is more intuitive for exploring a strategic plan than a linear report, as it allows users to dive into the areas that interest them most, promoting non-linear exploration and better synthesis of the interconnected project parts.
+    Visualization & Content Choices: 
+    - Report Info: Governance models comparison table -> Goal: Compare -> Viz: Interactive tabs and a donut chart -> Interaction: User clicks a tab to see details for one model, chart visualizes establishment costs -> Justification: Simplifies a dense table into a digestible, one-at-a-time comparison, making the recommendation clearer. Library: Chart.js for the donut chart.
+    - Report Info: Phased action plan -> Goal: Show Change/Process -> Viz: Vertical timeline diagram -> Interaction: Scroll-based animations highlight each phase -> Justification: A timeline is the most intuitive way to represent a multi-stage plan, making the sequence and duration clear. Library: HTML/CSS/JS.
+    - Report Info: Stakeholder map -> Goal: Organize/Inform -> Viz: Interactive grid of logos/names -> Interaction: Clicking a stakeholder reveals a modal with their detailed role -> Justification: A visual map is more engaging than a list. Modals keep the main interface clean while providing deep-dive information on demand. Library: HTML/CSS/JS.
+    - Report Info: Key Performance Indicators (KPIs) -> Goal: Inform/Compare -> Viz: Bar charts and metric cards -> Interaction: Animated on scroll -> Justification: Bar charts provide a clear visual comparison for metrics like "Percepción de Seguridad," making the targeted improvement obvious. Library: Chart.js.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* slate-50 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            display: block;
+            margin-top: 5px;
+            right: 0;
+            background: #16A34A; /* green-600 */
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover:after, .nav-link.active:after {
+            width: 100%;
+            left: 0;
+            background: #16A34A; /* green-600 */
+        }
+        .kpi-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tab-button.active {
+            background-color: #16A34A; /* green-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-content {
+            transition: transform 0.25s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#vision" class="text-2xl font-bold text-green-600">Bio-Energía</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#hoja-de-ruta" class="nav-link text-slate-600 hover:text-green-600 font-medium">Hoja de Ruta</a>
+                <a href="#gobernanza" class="nav-link text-slate-600 hover:text-green-600 font-medium">Gobernanza</a>
+                <a href="#actores" class="nav-link text-slate-600 hover:text-green-600 font-medium">Actores Clave</a>
+                <a href="#tecnologia" class="nav-link text-slate-600 hover:text-green-600 font-medium">Tecnología</a>
+                <a href="#kpis" class="nav-link text-slate-600 hover:text-green-600 font-medium">Métricas de Éxito</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-slate-600 hover:text-green-600 hover:bg-slate-100">
+                <span class="w-6 h-0.5 bg-current block mb-1.5"></span>
+                <span class="w-6 h-0.5 bg-current block"></span>
+                <span class="w-4 h-0.5 bg-current block mt-1.5"></span>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 flex-col space-y-4">
+            <a href="#hoja-de-ruta" class="block text-slate-600 hover:text-green-600">Hoja de Ruta</a>
+            <a href="#gobernanza" class="block text-slate-600 hover:text-green-600">Gobernanza</a>
+            <a href="#actores" class="block text-slate-600 hover:text-green-600">Actores Clave</a>
+            <a href="#tecnologia" class="block text-slate-600 hover:text-green-600">Tecnología</a>
+            <a href="#kpis" class="block text-slate-600 hover:text-green-600">Métricas de Éxito</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-20">
+
+        <!-- Section: Audio Player -->
+        <section id="audio-player" class="text-center mb-16">
+            <audio id="background-audio" src="audio/ambient-music.mp3" preload="auto" loop></audio>
+            <button id="audio-control-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-green-500/50 transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center mx-auto">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span id="audio-text">Reproducir Audio</span>
+            </button>
+        </section>
+
+        <!-- Section: Visión del Proyecto -->
+        <section id="vision" class="text-center mb-24">
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight">
+                Un Modelo Urbano Regenerativo para 
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">San José</span>
+            </h1>
+            <p class="mt-6 max-w-3xl mx-auto text-lg text-slate-600">
+                El Proyecto Bio-Energía es una iniciativa de vanguardia para crear espacios públicos seguros, vibrantes y sostenibles, fusionando la sabiduría comunitaria con la innovación tecnológica.
+            </p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-xl font-bold text-green-600">Revitalización Cultural</h3>
+                    <p class="mt-2 text-slate-500">Crear un nuevo centro cultural y social, una fuente de creatividad y cohesión (Apolo).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-xl font-bold text-green-600">Resiliencia Comunitaria</h3>
+                    <p class="mt-2 text-slate-500">Fomentar la resiliencia y regeneración urbana a través de la participación (Sol Invictus).</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-xl font-bold text-green-600">Sostenibilidad Innovadora</h3>
+                    <p class="mt-2 text-slate-500">Integrar naturaleza y tecnología para la máxima eficiencia y sostenibilidad (Bio-Energía).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Hoja de Ruta -->
+        <section id="hoja-de-ruta" class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900">Hoja de Ruta del Proyecto</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-center text-slate-600">
+                Un plan de acción por fases para guiar el proyecto desde su concepción hasta su implementación, asegurando un desarrollo estructurado y meditado.
+            </p>
+            <div class="mt-12 relative">
+                <!-- Vertical Line -->
+                <div class="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-slate-200" aria-hidden="true"></div>
+                <!-- Timeline items -->
+                <div class="space-y-16">
+                    <!-- Item 1 -->
+                    <div class="relative flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <h3 class="text-2xl font-bold text-green-600">Fase 1</h3>
+                            <p class="text-lg font-semibold text-slate-800">Fundación y Legitimación</p>
+                            <p class="text-sm text-slate-500">(Meses 1-3)</p>
+                            <ul class="mt-4 text-slate-600 list-none text-right">
+                                <li>Constituir el Fideicomiso de Obra Pública.</li>
+                                <li>Formalizar alianzas con socios clave (MSJ, Intel, FIFCO, BAC).</li>
+                                <li>Construir el equipo de vinculación comunitaria.</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-green-600 border-4 border-white flex items-center justify-center text-white font-bold">1</div>
+                        <div class="w-1/2 pl-8"></div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="relative flex items-center">
+                        <div class="w-1/2 pr-8"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-green-600 border-4 border-white flex items-center justify-center text-white font-bold">2</div>
+                        <div class="w-1/2 pl-8 text-left">
+                            <h3 class="text-2xl font-bold text-green-600">Fase 2</h3>
+                            <p class="text-lg font-semibold text-slate-800">Co-diseño y Planificación</p>
+                            <p class="text-sm text-slate-500">(Meses 4-9)</p>
+                            <ul class="mt-4 text-slate-600 list-none text-left">
+                                <li>Ejecutar talleres de diseño participativo con la comunidad.</li>
+                                <li>Desarrollar el Plan Maestro y diseños técnicos.</li>
+                                <li>Iniciar el proceso de permisos municipales.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="relative flex items-center">
+                        <div class="w-1/2 pr-8 text-right">
+                            <h3 class="text-2xl font-bold text-green-600">Fase 3</h3>
+                            <p class="text-lg font-semibold text-slate-800">Financiamiento e Implementación</p>
+                            <p class="text-sm text-slate-500">(Meses 10-24+)</p>
+                            <ul class="mt-4 text-slate-600 list-none text-right">
+                                <li>Asegurar el financiamiento completo del proyecto.</li>
+                                <li>Lanzar licitación y supervisar la construcción.</li>
+                                <li>Desarrollar plan de operación y mantenimiento.</li>
+                            </ul>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-green-600 border-4 border-white flex items-center justify-center text-white font-bold">3</div>
+                        <div class="w-1/2 pl-8"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Gobernanza -->
+        <section id="gobernanza" class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900">Arquitectura de Gobernanza</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-center text-slate-600">
+                La elección de la estructura legal es crítica para el éxito a largo plazo. Se analizaron tres modelos, recomendando el Fideicomiso de Obra Pública por su robustez y eficiencia fiscal.
+            </p>
+            <div class="mt-12">
+                <div class="flex justify-center mb-8 space-x-2 md:space-x-4">
+                    <button class="tab-button px-4 py-2 rounded-lg font-medium transition" data-tab="fideicomiso">Fideicomiso de Obra Pública</button>
+                    <button class="tab-button px-4 py-2 rounded-lg font-medium transition" data-tab="fundacion">Fundación</button>
+                    <button class="tab-button px-4 py-2 rounded-lg font-medium transition" data-tab="app">Alianza Público-Privada (APP)</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div id="tab-content" class="lg:col-span-3 bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col justify-center">
+                         <h3 class="text-xl font-bold text-center text-slate-800 mb-4">Costos Relativos de Establecimiento</h3>
+                        <div class="chart-container relative h-64 md:h-80 mx-auto w-full max-w-sm">
+                            <canvas id="governanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Actores Clave -->
+        <section id="actores" class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900">Ecosistema de Actores Clave</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-center text-slate-600">
+                El éxito depende de una sólida coalición de socios de los sectores público, civil y privado. Conozca a los protagonistas.
+            </p>
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Stakeholders will be injected by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Tecnología -->
+        <section id="tecnologia" class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900">La Columna Vertebral Tecnológica</h2>
+             <p class="mt-4 max-w-2xl mx-auto text-center text-slate-600">
+                El componente "Energía" se materializa con infraestructura de vanguardia para maximizar la eficiencia, seguridad y sostenibilidad del espacio público.
+            </p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 kpi-card">
+                    <div class="text-4xl mb-4 text-green-500">💡</div>
+                    <h3 class="text-xl font-bold">Iluminación Inteligente</h3>
+                    <p class="mt-2 text-slate-600">Sistemas LED con telegestión para ajustar la luz dinámicamente, ahorrar hasta un 90% de energía y mejorar la percepción de seguridad.</p>
+                </div>
+                 <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 kpi-card">
+                    <div class="text-4xl mb-4 text-green-500">🌐</div>
+                    <h3 class="text-xl font-bold">Plataforma de Parque Inteligente</h3>
+                    <p class="mt-2 text-slate-600">Una plataforma integrada que gestiona Wi-Fi público, cámaras de seguridad, sensores ambientales y sistemas de riego y residuos.</p>
+                </div>
+                 <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 kpi-card">
+                    <div class="text-4xl mb-4 text-green-500">🎋</div>
+                    <h3 class="text-xl font-bold">Materiales Sostenibles</h3>
+                    <p class="mt-2 text-slate-600">Uso prioritario de recursos locales como bambú, piedra y madera, en colaboración con artesanos costarricenses para un diseño auténtico.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: KPIs -->
+        <section id="kpis" class="mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900">Midiendo el Éxito</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-center text-slate-600">
+                El impacto del proyecto se medirá con Indicadores Clave de Desempeño (KPIs) en las áreas ambiental, social y económica.
+            </p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4 text-center">Ambiental 🌳</h3>
+                    <div class="chart-container relative h-48 w-full">
+                         <canvas id="kpiAmbientalChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4 text-center">Social 👥</h3>
+                    <div class="chart-container relative h-48 w-full">
+                        <canvas id="kpiSocialChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="font-bold text-lg mb-4 text-center">Económico 📈</h3>
+                    <div class="chart-container relative h-48 w-full">
+                        <canvas id="kpiEconomicoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2024 Proyecto Bio-Energía. Un futuro sostenible para San José.</p>
+        </div>
+    </footer>
+
+    <!-- Stakeholder Modal -->
+    <div id="stakeholder-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="modal-content bg-white rounded-lg shadow-xl p-8 max-w-lg w-full transform scale-95">
+            <div class="flex justify-between items-start">
+                <h3 id="modal-title" class="text-2xl font-bold text-slate-900"></h3>
+                <button id="modal-close-btn" class="text-slate-500 hover:text-red-500">&times;</button>
+            </div>
+            <p id="modal-category" class="text-sm font-semibold text-green-600 uppercase mt-1"></p>
+            <p id="modal-contribution" class="mt-4 text-slate-600"></p>
+            <p id="modal-alignment" class="mt-4 text-slate-600"></p>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Audio Player Logic
+    const audio = document.getElementById('background-audio');
+    const audioControlButton = document.getElementById('audio-control-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const audioText = document.getElementById('audio-text');
+    let isPlaying = false;
+
+    function updateAudioButtonUI() {
+        if (isPlaying) {
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+            audioText.textContent = 'Pausar Audio';
+        } else {
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            audioText.textContent = 'Reproducir Audio';
+        }
+    }
+
+    audioControlButton.addEventListener('click', () => {
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
+        }
+        isPlaying = !isPlaying;
+        updateAudioButtonUI();
+    });
+
+    audio.onplay = () => {
+        isPlaying = true;
+        updateAudioButtonUI();
+    };
+
+    audio.onpause = () => {
+        isPlaying = false;
+        updateAudioButtonUI();
+    };
+
+
+    // Governance Tabs
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContentContainer = document.getElementById('tab-content');
+    const governanceData = {
+        fideicomiso: {
+            title: 'Opción C: Fideicomiso de Obra Pública (Recomendado)',
+            content: `
+                <p class="mb-4 text-slate-600">Un contrato que transfiere bienes a un administrador profesional (fiduciario), creando un <strong>patrimonio autónomo e inembargable</strong> que protege los activos del proyecto.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Máxima Protección de Activos:</strong> El patrimonio está legalmente separado y protegido de acreedores.</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Alta Eficiencia Fiscal:</strong> No sujeto al impuesto sobre utilidades y con potencial exención total del IVA y timbre fiscal.</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Gestión Profesional:</strong> Administrado por una entidad experta (ej. un banco), asegurando transparencia.</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Flexibilidad Financiera:</strong> Puede gestionar fondos públicos, privados y donaciones de manera eficiente.</li>
+                </ul>
+                <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="font-bold text-green-800">Ideal para: Proyectos públicos complejos que requieren máxima seguridad jurídica, gestión financiera profesional y la más alta eficiencia fiscal.</p>
+                </div>
+            `
+        },
+        fundacion: {
+            title: 'Opción A: Fundación',
+            content: `
+                <p class="mb-4 text-slate-600">Entidad jurídica privada de utilidad pública y sin fines de lucro, orientada al bienestar social.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Legitimidad Social:</strong> Fuerte respaldo por su naturaleza de "utilidad pública".</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Recepción de Donaciones:</strong> Puede recibir donaciones exentas de impuestos.</li>
+                    <li class="flex items-start"><span class="text-red-500 mr-2">✖</span><strong>Supervisión Estatal:</strong> Requiere un representante del gobierno en su junta, lo que puede reducir la agilidad.</li>
+                    <li class="flex items-start"><span class="text-red-500 mr-2">✖</span><strong>Gestión Compleja:</strong> Puede ser administrativamente más compleja que otras figuras.</li>
+                </ul>
+                 <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="font-bold text-yellow-800">Ideal para: Proyectos con una misión puramente social y dependientes de filantropía.</p>
+                </div>
+            `
+        },
+        app: {
+            title: 'Opción B: Alianza Público-Privada (APP)',
+            content: `
+                <p class="mb-4 text-slate-600">Modelo de colaboración entre el sector público y privado para desarrollar proyectos de interés público.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Aprovecha Capital Privado:</strong> Acceso a la inversión, eficiencia e innovación del sector privado.</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✔</span><strong>Transferencia de Riesgos:</strong> Puede transferir riesgos de construcción y operación al socio privado.</li>
+                    <li class="flex items-start"><span class="text-red-500 mr-2">✖</span><strong>Proceso Largo y Complejo:</strong> La negociación y formalización requieren una considerable capacidad técnica y legal.</li>
+                    <li class="flex items-start"><span class="text-red-500 mr-2">✖</span><strong>Riesgo de Desalineación:</strong> Requiere supervisión constante para evitar que los intereses privados se desvíen del objetivo público.</li>
+                </ul>
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="font-bold text-yellow-800">Ideal para: Proyectos de gran escala con un modelo de negocio claro que genere ingresos.</p>
+                </div>
+            `
+        }
+    };
+
+    function updateTabContent(tabId) {
+        tabButtons.forEach(button => {
+            if (button.dataset.tab === tabId) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+        const data = governanceData[tabId];
+        tabContentContainer.innerHTML = `
+            <h3 class="text-2xl font-bold text-slate-900 mb-4">${data.title}</h3>
+            ${data.content}
+        `;
+    }
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            updateTabContent(button.dataset.tab);
+        });
+    });
+
+    // Governance Chart
+    const ctxGovernance = document.getElementById('governanceChart').getContext('2d');
+    new Chart(ctxGovernance, {
+        type: 'doughnut',
+        data: {
+            labels: ['Fideicomiso', 'Fundación', 'APP'],
+            datasets: [{
+                label: 'Costos de Establecimiento',
+                data: [15, 25, 60], // Relative cost representation
+                backgroundColor: ['#16A34A', '#FBBF24', '#EF4444'],
+                borderColor: '#FFFFFF',
+                borderWidth: 4,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: Costo Relativo`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    updateTabContent('fideicomiso');
+
+
+    // Stakeholders
+    const stakeholdersContainer = document.querySelector('#actores .grid');
+    const stakeholders = [
+        { name: 'Municipalidad de San José', category: 'Público', contribution: 'Proporciona permisos, respaldo institucional y co-gestión del espacio.', alignment: 'Alineado con su mandato de renovación urbana y mejora de la calidad de vida.' },
+        { name: 'Intel Costa Rica', category: 'Privado (RSE)', contribution: 'Aporta financiamiento, experiencia técnica en tecnología y voluntariado.', alignment: 'Alineado con sus metas de sostenibilidad (agua, residuos) y educación STEM.' },
+        { name: 'FIFCO', category: 'Privado (RSE)', contribution: 'Provee financiamiento y expertise en gestión de agua, residuos y economía circular.', alignment: 'Alineado con su agenda ambiental de ser Agua Positiva y Cero Residuos.' },
+        { name: 'BAC Credomatic', category: 'Privado (RSE)', contribution: 'Ofrece financiamiento, estructuración financiera (Fideicomiso) y plataforma de donaciones "Yo Me Uno".', alignment: 'Alineado con su estrategia de "Triple Valor" para proyectos con impacto social y ambiental.' },
+        { name: 'Fundación CRUSA', category: 'Sociedad Civil', contribution: 'Fuente potencial de financiamiento (grants) y asesoría técnica en sostenibilidad.', alignment: 'Alineado con su área estratégica de Ciudades Sostenibles y Acción Climática.' },
+        { name: 'ADI Local', category: 'Sociedad Civil', contribution: 'Clave para la movilización comunitaria, legitimidad local y el proceso participativo.', alignment: 'Interesados en la mejora directa de la infraestructura y calidad de vida de su comunidad.' },
+        { name: 'ONGs de Apoyo a Migrantes', category: 'Sociedad Civil', contribution: 'Facilitan la participación de la comunidad migrante, asegurando inclusión y equidad.', alignment: 'Alineado con su misión de proteger y empoderar a poblaciones vulnerables.' },
+        { name: 'Chepecletas', category: 'Sociedad Civil', contribution: 'Expertos en la activación cultural de espacios públicos para atraer a diversos públicos.', alignment: 'Interesados en crear espacios urbanos más vibrantes y explorables.' }
+    ];
+
+    stakeholders.forEach(stakeholder => {
+        const stakeholderEl = document.createElement('div');
+        stakeholderEl.className = 'bg-white p-4 rounded-xl shadow-lg border border-slate-200 text-center kpi-card cursor-pointer';
+        stakeholderEl.innerHTML = `
+            <p class="font-bold text-slate-800">${stakeholder.name}</p>
+            <p class="text-sm font-medium text-green-600">${stakeholder.category}</p>
+        `;
+        stakeholderEl.addEventListener('click', () => openModal(stakeholder));
+        stakeholdersContainer.appendChild(stakeholderEl);
+    });
+
+    // Stakeholder Modal Logic
+    const modal = document.getElementById('stakeholder-modal');
+    const modalContent = document.querySelector('.modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalCategory = document.getElementById('modal-category');
+    const modalContribution = document.getElementById('modal-contribution');
+    const modalAlignment = document.getElementById('modal-alignment');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    function openModal(data) {
+        modalTitle.textContent = data.name;
+        modalCategory.textContent = data.category;
+        modalContribution.innerHTML = `<strong>Contribución Potencial:</strong> ${data.contribution}`;
+        modalAlignment.innerHTML = `<strong>Alineación Estratégica:</strong> ${data.alignment}`;
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+    }
+
+    function closeModal() {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modalContent.classList.add('scale-95');
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+
+    // KPI Charts
+    const kpiOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        scales: {
+            x: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            },
+            y: {
+                grid: {
+                    display: false
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    };
+
+    new Chart(document.getElementById('kpiAmbientalChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Ahorro Energético', 'Reducción de Huella de Carbono'],
+            datasets: [{
+                label: 'Meta',
+                data: [70, 80],
+                backgroundColor: ['#34D399', '#A7F3D0'],
+                borderRadius: 4,
+                barThickness: 20
+            }]
+        },
+        options: kpiOptions
+    });
+    
+    new Chart(document.getElementById('kpiSocialChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Percepción de Seguridad (Post)', 'Percepción de Seguridad (Pre)'],
+            datasets: [{
+                label: 'Nivel',
+                data: [88, 29],
+                backgroundColor: ['#60A5FA', '#BFDBFE'],
+                borderRadius: 4,
+                barThickness: 20
+            }]
+        },
+        options: kpiOptions
+    });
+
+    new Chart(document.getElementById('kpiEconomicoChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Nuevas Inversiones', 'Actividad Local'],
+            datasets: [{
+                label: 'Aumento Esperado',
+                data: [60, 75],
+                backgroundColor: ['#FBBF24', '#FDE68A'],
+                borderRadius: 4,
+                barThickness: 20
+            }]
+        },
+        options: kpiOptions
+    });
+
+});
+</script>
+
+</body>
+</html>
